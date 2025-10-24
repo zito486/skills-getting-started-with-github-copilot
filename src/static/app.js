@@ -18,11 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
 
-  function renderParticipantsList(participants) {
+  function renderParticipantsList(participants, activityName) {
     if (!participants || participants.length === 0) {
       return '<p class="info">No participants yet.</p>';
     }
-    return '<ul class="participants-list">' + participants.map(p => `<li>${escapeHTML(p)}</li>`).join('') + '</ul>';
+    // Add a delete icon (button) next to each participant
+    return '<ul class="participants-list">' + participants.map(p =>
+      `<li><span class="participant-name">${escapeHTML(p)}</span> <button class="delete-participant" title="Remove participant" data-activity="${escapeHTML(activityName)}" data-email="${escapeHTML(p)}">&#128465;</button></li>`
+    ).join('') + '</ul>';
   }
 
   function renderActivities(data) {
@@ -37,10 +40,29 @@ document.addEventListener('DOMContentLoaded', () => {
         <p><strong>Spots:</strong> ${info.participants.length}/${info.max_participants}</p>
         <div class="participants">
           <h5 class="participants-title">Participants</h5>
-          ${renderParticipantsList(info.participants)}
+          ${renderParticipantsList(info.participants, name)}
         </div>
       `;
       activitiesList.appendChild(card);
+    });
+    // Add event listeners for delete buttons
+    activitiesList.querySelectorAll('.delete-participant').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const activity = btn.getAttribute('data-activity');
+        const email = btn.getAttribute('data-email');
+        if (!activity || !email) return;
+        if (!confirm(`Remove ${email} from ${activity}?`)) return;
+        try {
+          const url = `/activities/${encodeURIComponent(activity)}/unregister?email=${encodeURIComponent(email)}`;
+          const res = await fetch(url, { method: 'DELETE' });
+          const payload = await res.json();
+          if (!res.ok) throw new Error(payload.detail || payload.message || 'Unregister failed');
+          showMessage(payload.message || 'Participant removed', 'success');
+          await fetchActivities();
+        } catch (err) {
+          showMessage(err.message || 'Unregister failed', 'error');
+        }
+      });
     });
   }
 
@@ -57,7 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
   async function fetchActivities() {
     activitiesList.innerHTML = '<p>Loading activities...</p>';
     try {
-      const res = await fetch('/activities');
+      // Add a cache-busting query parameter
+      const res = await fetch(`/activities?_=${Date.now()}`);
       if (!res.ok) throw new Error('Failed to load activities');
       const data = await res.json();
       renderActivities(data);
