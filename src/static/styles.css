@@ -74,6 +74,66 @@ section h3 {
   margin-bottom: 8px;
 }
 
+/* New: participants section inside activity cards */
+.participants {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.participants-title {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #1a237e;
+  font-weight: 600;
+}
+
+
+.participants-list {
+  list-style: none; /* Hide bullet points */
+  margin-left: 0;
+  color: #444;
+  font-size: 14px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 6px;
+  padding-left: 0;
+}
+
+.participants-list li {
+  margin-bottom: 6px;
+  word-break: break-word;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.delete-participant {
+  background: none;
+  border: none;
+  color: #c62828;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 8px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+.delete-participant:hover {
+  background: #ffeaea;
+}
+
+/* Small, subtle styling when there are no participants */
+.activity-card .info {
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 13px;
+  background: #eef7ff;
+  border-radius: 4px;
+  color: #0c5460;
+  border: 1px solid #d0eefc;
+}
+
 .form-group {
   margin-bottom: 15px;
 }
